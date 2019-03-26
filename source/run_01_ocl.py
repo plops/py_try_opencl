@@ -13,6 +13,7 @@ import sys
 import docopt
 import traceback
 import numpy as np
+import pyopencl as cl
 import pathlib
 import time
 def current_milli_time():
@@ -20,3 +21,8 @@ def current_milli_time():
 args=docopt.docopt(__doc__, version="0.0.1")
 if ( args["--verbose"] ):
     print(args)
+platforms=cl.get_platforms()
+platform=platforms[0]
+devices=platform.get_devices(cl.device_type.GPU)
+device=devices[0]
+context=cl.Context([device])

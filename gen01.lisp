@@ -5,6 +5,8 @@
 ;(setf *features* (union *features* '(:plot :pd :highres)))
 ;(setf *features* (set-difference *features* '(:highres)))
 
+;https://towardsdatascience.com/get-started-with-gpu-image-processing-15e34b787480
+
 (defun timer (name body)
   (let ((start (format nil "time_before_~a" name))
 	(end (format nil "time_after_~a" name)))
@@ -52,6 +54,7 @@ Options:
 		      docopt
 		      traceback
 		      (np numpy)
+		      (cl pyopencl)
 		      ;(pd pandas)
 		      ;(xr xarray)
 		      pathlib
@@ -65,5 +68,12 @@ Options:
 	    	    
 	    (setf args (docopt.docopt __doc__ :version (string "0.0.1")))
 	    (if (aref args (string "--verbose"))
-		(print args)))))
+		(print args))
+
+	    (setf platforms (cl.get_platforms)
+		  platform (aref platforms 0)
+		  devices (platform.get_devices cl.device_type.GPU)
+		  device (aref devices 0)
+		  context (cl.Context (list device)))
+	    )))
     (write-source *source* code)))
