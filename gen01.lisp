@@ -80,6 +80,13 @@ Options:
 		     res (- current_time g_last_timestamp)
 		     g_last_timestamp current_time)
 	       (return res))
+	     (def fail (msg)
+			  (print (+ bcolors.FAIL
+				    (dot (string "{:8d} FAIL ")
+					 (format (milli_since_last)))
+				    msg
+				    bcolors.ENDC))
+			  (sys.stdout.flush))
 	     (def plog (msg)
 	       (print (+ bcolors.OKGREEN
 			 (dot (string "{:8d} LOG ")
@@ -105,11 +112,37 @@ Options:
 		   img_in_z 34
 		   )
 	     (setf img_in (np.full (tuple img_in_z img_in_y)  1.5s0 :dtype np.float32)))
-	    (do0
-	     (plog (string "instantiate in and output arrays on the gpu"))
-	     (setf gpu_shape img_in.shape
-		   img_in_gpu (cl.Image context cl.mem_flags.READ_ONLY (cl.ImageFormat cl.channel_order.LUMINANCE cl.channel_type.FLOAT) :shape gpu_shape)
-		   img_out_gpu (cl.Image context cl.mem_flags.WRITE_ONLY (cl.ImageFormat cl.channel_order.LUMINANCE cl.channel_type.FLOAT) :shape gpu_shape)
-		   ))
+	    (try
+	     (do0
+	      (plog (string "instantiate in and output arrays on the gpu"))
+	      (setf gpu_shape img_in.shape
+		    img_in_gpu (cl.Image context  cl.mem_flags.READ_ONLY (cl.ImageFormat cl.channel_order.LUMINANCE cl.channel_type.FLOAT) :shape gpu_shape)
+		    img_out_gpu (cl.Image context cl.mem_flags.WRITE_ONLY (cl.ImageFormat cl.channel_order.R cl.channel_type.FLOAT) :shape gpu_shape)
+		    ))
+	     ("Exception as e"
+	      (do0
+	       (do0
+		(setf (ntuple type_ value_ tb_ ) (sys.exc_info)
+		      lineno (dot tb_ tb_lineno))
+		#+nil
+		(fail (dot (string "Error in line {} of {} {}: '{}' prop='{}' value={}")
+			   (format lineno
+				   (dot (type e)
+					__name__)
+				   (dot (string ".")
+					(join (list self.__module__
+						    self.__class__.__name__)))
+				   e
+				   prop
+				   value)))
+		(for (e (traceback.format_tb tb_))
+		     (fail e)))
+	       
+	       
+	       (setf fmts (cl.get_supported_image_formats context
+							  cl.mem_flags.READ_ONLY
+							  cl.mem_object_type.IMAGE2D))
+	       (plog (dot (string "supported READ_ONLY IMAGE2D formats: {}.")
+			  (format fmts))))))
 	    )))
     (write-source *source* code)))
