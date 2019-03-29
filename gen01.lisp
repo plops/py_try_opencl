@@ -62,10 +62,31 @@ Options:
 		      
 		      ))
 
+	    
+	    
 	    (def current_milli_time ()
 	      (return (int (round (* 1000 (time.time))))))
-	    
-	    	    
+	    (do0
+	     (class bcolors ()
+		    (setf OKGREEN (string "\\033[92m")
+			  WARNING (string "\\033[93m")
+			  FAIL (string "\\033[91m")
+			  ENDC (string "\\033[0m")))
+	     "global g_last_timestamp"
+	     (setf g_last_timestamp (current_milli_time))
+	     (def milli_since_last ()
+	       "global g_last_timestamp"
+	       (setf current_time (current_milli_time)
+		     res (- current_time g_last_timestamp)
+		     g_last_timestamp current_time)
+	       (return res))
+	     (def plog (msg)
+	       (print (+ bcolors.OKGREEN
+			 (dot (string "{:8d} LOG ")
+			      (format (milli_since_last)))
+			 msg
+			 bcolors.ENDC))
+	       (sys.stdout.flush)))	    
 	    (setf args (docopt.docopt __doc__ :version (string "0.0.1")))
 	    (if (aref args (string "--verbose"))
 		(print args))
@@ -75,5 +96,20 @@ Options:
 		  devices (platform.get_devices cl.device_type.GPU)
 		  device (aref devices 0)
 		  context (cl.Context (list device)))
+	    (plog (dot (string "using first device of {}")
+		       (format devices)))
+	    (setf queue (cl.CommandQueue context device))
+	    (do0
+	     (plog (string "create refractive index distribution"))
+	     (setf img_in_y 128
+		   img_in_z 34
+		   )
+	     (setf img_in (np.full (tuple img_in_z img_in_y)  1.5s0 :dtype np.float32)))
+	    (do0
+	     (plog (string "instantiate in and output arrays on the gpu"))
+	     (setf gpu_shape img_in.shape
+		   img_in_gpu (cl.Image context cl.mem_flags.READ_ONLY (cl.ImageFormat cl.channel_order.LUMINANCE cl.channel_type.FLOAT) :shape gpu_shape)
+		   img_out_gpu (cl.Image context cl.mem_flags.WRITE_ONLY (cl.ImageFormat cl.channel_order.LUMINANCE cl.channel_type.FLOAT) :shape gpu_shape)
+		   ))
 	    )))
     (write-source *source* code)))

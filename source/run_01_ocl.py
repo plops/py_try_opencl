@@ -18,6 +18,22 @@ import pathlib
 import time
 def current_milli_time():
     return int(round(((1000)*(time.time()))))
+class bcolors():
+    OKGREEN="\033[92m"
+    WARNING="\033[93m"
+    FAIL="\033[91m"
+    ENDC="\033[0m"
+global g_last_timestamp
+g_last_timestamp=current_milli_time()
+def milli_since_last():
+    global g_last_timestamp
+    current_time=current_milli_time()
+    res=((current_time)-(g_last_timestamp))
+    g_last_timestamp=current_time
+    return res
+def plog(msg):
+    print(((bcolors.OKGREEN)+("{:8d} LOG ".format(milli_since_last()))+(msg)+(bcolors.ENDC)))
+    sys.stdout.flush()
 args=docopt.docopt(__doc__, version="0.0.1")
 if ( args["--verbose"] ):
     print(args)
@@ -26,3 +42,13 @@ platform=platforms[0]
 devices=platform.get_devices(cl.device_type.GPU)
 device=devices[0]
 context=cl.Context([device])
+plog("using first device of {}".format(devices))
+queue=cl.CommandQueue(context, device)
+plog("create refractive index distribution")
+img_in_y=128
+img_in_z=34
+img_in=np.full((img_in_z,img_in_y,), (1.4999999999999997e+0), dtype=np.float32)
+plog("instantiate in and output arrays on the gpu")
+gpu_shape=img_in.shape
+img_in_gpu=cl.Image(context, cl.mem_flags.READ_ONLY, cl.ImageFormat(cl.channel_order.LUMINANCE, cl.channel_type.FLOAT), shape=gpu_shape)
+img_out_gpu=cl.Image(context, cl.mem_flags.WRITE_ONLY, cl.ImageFormat(cl.channel_order.LUMINANCE, cl.channel_type.FLOAT), shape=gpu_shape)
