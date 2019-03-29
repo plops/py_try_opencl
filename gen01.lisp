@@ -116,7 +116,7 @@ Options:
 	     (do0
 	      (plog (string "instantiate in and output arrays on the gpu"))
 	      (setf gpu_shape img_in.shape
-		    img_in_gpu (cl.Image context  cl.mem_flags.READ_ONLY (cl.ImageFormat cl.channel_order.LUMINANCE cl.channel_type.FLOAT) :shape gpu_shape)
+		    img_in_gpu (cl.Image context  cl.mem_flags.READ_ONLY (cl.ImageFormat cl.channel_order.R cl.channel_type.FLOAT) :shape gpu_shape)
 		    img_out_gpu (cl.Image context cl.mem_flags.WRITE_ONLY (cl.ImageFormat cl.channel_order.R cl.channel_type.FLOAT) :shape gpu_shape)
 		    ))
 	     ("Exception as e"
