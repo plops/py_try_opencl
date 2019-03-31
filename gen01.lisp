@@ -135,7 +135,7 @@ Options:
 	    (try
 	     (do0
 	      (plog (string "instantiate in and output arrays on the gpu"))
-	      (setf gpu_shape img_in.shape
+	      (setf gpu_shape img_in.T.shape
 		    img_in_gpu (cl.Image context  cl.mem_flags.READ_ONLY (cl.ImageFormat cl.channel_order.R cl.channel_type.FLOAT) :shape gpu_shape)
 		    img_out_gpu (cl.Image context cl.mem_flags.WRITE_ONLY (cl.ImageFormat cl.channel_order.R cl.channel_type.FLOAT) :shape gpu_shape)
 		    ))
@@ -167,6 +167,20 @@ Options:
 	    (setf program_code (string3 ,cl-cpp-generator::*cl-program*))
 	    (setf program (dot (cl.Program context program_code)
 			       (build)))
-	    
-	    )))
+	    (do0
+	     (setf kernel (cl.Kernel program (string "morph_op_kernel")))
+	     (kernel.set_arg 0 img_in_gpu)
+	     (kernel.set_arg 1 (np.uint32 0))
+	     (kernel.set_arg 2 img_out_gpu))
+
+	    (cl.enqueue_copy queue img_in_gpu img_in
+			     :origin (tuple 0 0)
+			     :region gpu_shape
+			     :is_blocking False)
+	    (cl.enqueue_nd_range_kernel queue kernel gpu_shape None)
+	    (setf img_out (np.empty_like img_in))
+	    (cl.enqueue_copy queue img_out img_out_gpu
+			     :origin (tuple 0 0)
+			     :region gpu_shape
+			     :is_blocking True))))
     (write-source *source* code)))
