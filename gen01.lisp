@@ -1,5 +1,7 @@
 (eval-when (:compile-toplevel :execute :load-toplevel)
-  (ql:quickload "cl-py-generator"))
+  (mapc #'ql:quickload '("cl-py-generator"
+			 "cl-cpp-generator"
+		       )))
 (in-package :cl-py-generator)
 
 ;(setf *features* (union *features* '(:plot :pd :highres)))
@@ -17,7 +19,25 @@
      (print (dot (string ,(format nil "~a time: {}ms" name))
 		 (format (- ,end ,start)))))))
 
+
+
+
 (progn
+  (progn
+  #.(in-package #:cl-cpp-generator)
+
+  (defparameter *cl-program*
+    (cl-cpp-generator::beautify-source
+     `(with-compilation-unit
+	  
+	(decl ((sampler :type "__constant sampler_t" :init (|\|| CLK_NORMALIZED_COORDS_FALSE CLK_FILTER_NEAREST CLK_ADDRESS_CLAMP_TO_EDGE))))
+	(function (morph_op_kernel ((in :type "__read_only image2d_t")
+				    (op :type int)
+				    (out :type "__write_only image2d_t"))
+				   "__kernel void")
+		  (let ((x :type "const int" :init (funcall get_global_id 0)))))))))
+
+  #.(in-package #:cl-py-generator)
   (defparameter *path* "/home/martin/stage/py_try_opencl/")
   (defparameter *code-file* "run_01_ocl")
   (defparameter *source* (format nil "~a/source/~a" *path* *code-file*))
@@ -144,5 +164,9 @@ Options:
 							  cl.mem_object_type.IMAGE2D))
 	       (plog (dot (string "supported READ_ONLY IMAGE2D formats: {}.")
 			  (format fmts))))))
+	    (setf program_code (string3 ,cl-cpp-generator::*cl-program*))
+	    (setf program (dot (cl.Program context program_code)
+			       (build)))
+	    
 	    )))
     (write-source *source* code)))

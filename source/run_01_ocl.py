@@ -63,3 +63,11 @@ except Exception as e:
         fail(e)
     fmts=cl.get_supported_image_formats(context, cl.mem_flags.READ_ONLY, cl.mem_object_type.IMAGE2D)
     plog("supported READ_ONLY IMAGE2D formats: {}.".format(fmts))
+program_code="""__constant sampler_t sampler = (CLK_NORMALIZED_COORDS_FALSE |
+                                CLK_FILTER_NEAREST | CLK_ADDRESS_CLAMP_TO_EDGE);
+
+__kernel void morph_op_kernel(__read_only image2d_t in, int op,
+                              __write_only image2d_t out) {
+  { const int x = get_global_id(0); }
+}"""
+program=cl.Program(context, program_code).build()
