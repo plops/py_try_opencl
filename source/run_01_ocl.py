@@ -63,6 +63,7 @@ except Exception as e:
         fail(e)
     fmts=cl.get_supported_image_formats(context, cl.mem_flags.READ_ONLY, cl.mem_object_type.IMAGE2D)
     plog("supported READ_ONLY IMAGE2D formats: {}.".format(fmts))
+plog("define opencl program.")
 program_code="""__constant sampler_t sampler = (CLK_NORMALIZED_COORDS_FALSE |
                                 CLK_FILTER_NEAREST | CLK_ADDRESS_CLAMP_TO_EDGE);
 
@@ -71,11 +72,15 @@ __kernel void morph_op_kernel(__read_only image2d_t in, int op,
   { const int x = get_global_id(0); }
 }"""
 program=cl.Program(context, program_code).build()
+plog("built opencl program.")
 kernel=cl.Kernel(program, "morph_op_kernel")
 kernel.set_arg(0, img_in_gpu)
 kernel.set_arg(1, np.uint32(0))
 kernel.set_arg(2, img_out_gpu)
+plog("defined opencl kernel.")
 cl.enqueue_copy(queue, img_in_gpu, img_in, origin=(0,0,), region=gpu_shape, is_blocking=False)
 cl.enqueue_nd_range_kernel(queue, kernel, gpu_shape, None)
+plog("copied data to gpu and ran opencl kernel.")
 img_out=np.empty_like(img_in)
 cl.enqueue_copy(queue, img_out, img_out_gpu, origin=(0,0,), region=gpu_shape, is_blocking=True)
+plog("copied gpu result back to cpu.")

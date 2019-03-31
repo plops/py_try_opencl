@@ -164,23 +164,27 @@ Options:
 							  cl.mem_object_type.IMAGE2D))
 	       (plog (dot (string "supported READ_ONLY IMAGE2D formats: {}.")
 			  (format fmts))))))
+	    (plog (string "define opencl program."))
 	    (setf program_code (string3 ,cl-cpp-generator::*cl-program*))
 	    (setf program (dot (cl.Program context program_code)
 			       (build)))
+	    (plog (string "built opencl program."))
 	    (do0
 	     (setf kernel (cl.Kernel program (string "morph_op_kernel")))
 	     (kernel.set_arg 0 img_in_gpu)
 	     (kernel.set_arg 1 (np.uint32 0))
 	     (kernel.set_arg 2 img_out_gpu))
-
+	    (plog (string "defined opencl kernel."))
 	    (cl.enqueue_copy queue img_in_gpu img_in
 			     :origin (tuple 0 0)
 			     :region gpu_shape
 			     :is_blocking False)
 	    (cl.enqueue_nd_range_kernel queue kernel gpu_shape None)
+	    (plog (string "copied data to gpu and ran opencl kernel."))
 	    (setf img_out (np.empty_like img_in))
 	    (cl.enqueue_copy queue img_out img_out_gpu
 			     :origin (tuple 0 0)
 			     :region gpu_shape
-			     :is_blocking True))))
+			     :is_blocking True)
+	    (plog (string "copied gpu result back to cpu.")))))
     (write-source *source* code)))
