@@ -79,8 +79,7 @@ Options:
 		      ;(xr xarray)
 		      pathlib
 		      time
-		      
-		      ))
+		      (cl pyviennacl)))
 
 	    
 	    

@@ -16,6 +16,7 @@ import numpy as np
 import pyopencl as cl
 import pathlib
 import time
+import pyviennacl as cl
 def current_milli_time():
     return int(round(((1000)*(time.time()))))
 class bcolors():

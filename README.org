@@ -8,3 +8,15 @@
 ** Sparse Eigensolver
 - petsc (uses viennacl) https://www.mcs.anl.gov/petsc/documentation/installation.html#OpenCL
 - viennacl http://viennacl.sourceforge.net/
+- tutorial on lanczos method http://people.bath.ac.uk/mamamf/talks/lanczos.pdf
+- slepc http://slepc.upv.es/slepc4py-current/docs/usrman/tutorial.html
+# insert source with <s Tab
+#+BEGIN_SRC 
+pip3 install --user slepc4py
+#+END_SRC
+
+#+BEGIN_SRC 
+from petsc4py import PETSc
+from slepc4py import SLEPc
+import numpy
+#+END_SRC
