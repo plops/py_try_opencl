@@ -20,3 +20,4 @@ from petsc4py import PETSc
 from slepc4py import SLEPc
 import numpy
 #+END_SRC
+- lanczos method on gpu http://www.asc.tuwien.ac.at/~juengel/publications/pdf/icnaam2013.pdf
