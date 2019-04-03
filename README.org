@@ -2,6 +2,9 @@
 ** OpenCL
 - https://towardsdatascience.com/get-started-with-gpu-image-processing-15e34b787480
 - https://github.com/githubharald/GPUImageProcessingArticle
+- zero copy intel https://software.intel.com/en-us/articles/getting-the-most-from-opencl-12-how-to-increase-performance-by-minimizing-buffer-copies-on-intel-processor-graphics
+- halide has python interface now https://github.com/halide/Halide
+- halide examples https://github.com/fixstars/Halide-elements/tree/master/include
 ** Finite Difference Solver
 - https://github.com/lbolla/EMpy/blob/master/EMpy/modesolvers/FD.py
 - http://www.photonics.umd.edu/wp-content/uploads/pubs/ja-20/Fallahkhair_JLT_26_1423_2008.pdf
